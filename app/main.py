@@ -16,4 +16,4 @@ app.include_router(tasks.router)
 
 @app.get("/", response_class=HTMLResponse)
 def reat_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html", {"request": request})
