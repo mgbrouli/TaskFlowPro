@@ -25,6 +25,7 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, BASE_DIR)
 
 from app.core.database import Base
+from app.models.task import Task
 from app.models.user import User
 
 target_metadata = Base.metadata

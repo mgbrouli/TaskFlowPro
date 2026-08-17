@@ -1,5 +1,5 @@
 from app.core.database import Base
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
 class User(Base):
@@ -10,3 +10,4 @@ class User(Base):
     hashed_password : Mapped[str] = mapped_column(nullable=False)
     is_active : Mapped[bool] = mapped_column(default=True)
     
+    tasks = relationship("Task", back_populates="owner", cascade="all, delete-orphan")
