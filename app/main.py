@@ -1,13 +1,19 @@
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from app.routers import auth, tasks
-from fastapi import FastAPI
+
 
 
 app = FastAPI(title="TaskFlow Pro", version="1.0.0")
+
+templates = Jinja2Templates(directory="app/templates")
+
 
 app.include_router(auth.router)
 app.include_router(tasks.router)
 
 
-@app.get("/")
-def reat_root():
-    return {"message": "Bem-vindo ao TaskFLow Pro! API rodando com sucesso!"}
+@app.get("/", response_class=HTMLResponse)
+def reat_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
