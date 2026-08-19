@@ -1,7 +1,9 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from app.routers import auth, tasks
+from app.models.user import User
+from app.core.deps import get_current_user
 
 
 
@@ -17,3 +19,13 @@ app.include_router(tasks.router)
 @app.get("/", response_class=HTMLResponse)
 def reat_root(request: Request):
     return templates.TemplateResponse(request, "index.html", {"request": request})
+
+
+@app.get("/cadastro", response_class=HTMLResponse)
+def cadastro_face(request: Request):
+    return templates.TemplateResponse(request, "cadastro.html", {"request": request})
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard_page(request: Request):
+    return templates.TemplateResponse(request, "dashboard.html", {"request": request})

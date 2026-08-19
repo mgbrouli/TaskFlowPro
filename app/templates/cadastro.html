@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastro - TaskFlow Pro{% endblock %}
+
+{% block content %}
+{% raw %}
+<div x-data="authForm()" class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center" 
+        x-text="isRegister ? 'Criar Nova Conta' : 'Acesse sua Conta'">
+    </h2>
+    
+    <!-- Adicionamos @submit.prevent para capturar o envio via JS -->
+    <form @submit.prevent="submitForm" class="space-y-4">
+        
+        <!-- Campo de Nome (Aparece apenas se for cadastro) -->
+        <div x-show="isRegister" 
+             x-transition:enter="transition-all ease-out duration-300"
+             x-transition:enter-start="opacity-0 max-h-0"
+             x-transition:enter-end="opacity-100 max-h-40">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Nome Completo</label>
+            <input type="text" x-model="nome" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+    
+        <div>
+            <label class="block text-gray-700 text-sm font-bold mb-2">E-mail</label>
+            <input type="email" x-model="email" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+
+        <div>
+            <label class="block text-gray-700 text-sm font-bold mb-2">Senha</label>
+            <input type="password" x-model="password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+        </div>
+
+        <!-- Mensagem de feedback (Erro ou Sucesso) -->
+        <div x-show="message" :class="isError ? 'text-red-500' : 'text-green-500'" class="text-sm font-semibold text-center" x-text="message"></div>
+
+        <!-- Botão principal de ação -->
+        <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition">
+            <span x-text="isRegister ? 'Cadastrar' : 'Entrar'"></span>
+        </button>
+    </form>
+
+    <!-- Botão para alternar entre Login e Cadastro -->
+    <div class="mt-4 text-center">
+        <button @click="isRegister = !isRegister; message = ''" class="text-sm text-indigo-600 hover:underline focus:outline-none">
+            <span x-text="isRegister ? 'Já tem uma conta? Faça login' : 'Não tem conta? Cadastre-se'"></span>
+        </button>
+    </div>
+</div>
+{% endraw %}
+
+<!-- Script do Alpine.js -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script>
+    function authForm() {
+        return {
+            isRegister: false,
+            email: '',
+            password: '',
+            nome: '', // Nota: O backend atual não usa nome, mas se adicionar depois já está mapeado
+            message: '',
+            isError: false,
+
+            async submitForm() {
+                this.message = '';
+                const url = this.isRegister ? '/auth/register' : '/auth/login';
+                
+                // Estrutura que o Pydantic (UserCreate) espera
+                const payload = {
+                    email: this.email,
+                    password: this.password
+                };
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        this.isError = false;
+                        if (this.isRegister) {
+                            this.message = 'Conta criada com sucesso! Faça login.';
+                            this.isRegister = false; // Alterna para a tela de login
+                        } else {
+                            this.message = 'Login realizado com sucesso! Redirecionando...';
+                            // Salva o token de acesso retornado pela rota /login
+                            localStorage.setItem('access_token', data['access-token']);
+                            setTimeout(() => {
+                                window.location.href = '/dashboard'; // Mude para a sua página protegida
+                            }, 1000);
+                        }
+                    } else {
+                        this.isError = true;
+                        this.message = data.detail || 'Ocorreu um erro.';
+                    }
+                } catch (error) {
+                    this.isError = true;
+                    this.message = 'Erro de conexão com o servidor.';
+                    console.error(error);
+                }
+            }
+        }
+    }
+</script>
+
+{% endblock %}

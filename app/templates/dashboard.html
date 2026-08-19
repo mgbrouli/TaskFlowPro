@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - TaskFlow Pro{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+    <h1 class="text-3xl font-bold text-gray-800">Bem-vindo ao Dashboard!</h1>
+    <p id="user-email" class="text-gray-600 mt-2"></p>
+
+    <button onclick="logout()" class="mt-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+        Sair (Logout)
+    </button>
+</div>
+
+<script>
+    // Verifica se o token existe ao carregar a página
+    const token = localStorage.getItem('access_token');
+
+    if (!token) {
+        // Se não houver token, redireciona de volta para o login
+        window.location.href = '/auth'; // Ajuste para a rota da sua tela de login
+    }
+
+    function logout() {
+        localStorage.removeItem('access_token');
+        window.location.href = '/auth';
+
+    }
+    async function carregarTarefas() {
+        const token = localStorage.getItem('access_token');
+
+        const response = await fetch('/api/tasks', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`, // <-- É aqui que o "Not authenticated" deixa de acontecer
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.status === 401) {
+            // Se o token expirou ou é inválido, manda pro login
+            window.location.href = '/auth';
+            return;
+        }
+
+        const tasks = await response.json();
+        console.log(tasks);
+    }
+</script>
+{% endblock %}

@@ -7,6 +7,7 @@ from app.core.security import (
 from app.models.user import User
 from app.schemas.user import Token, UserCreate, UserResponse
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
@@ -43,4 +44,4 @@ def login(user_data: UserCreate, db: Session = Depends(get_db)):
         
     access_token = create_access_token(data={"sub": user.email})
     
-    return {"access-token": access_token, "token-type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer"}
